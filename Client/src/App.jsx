@@ -13,6 +13,8 @@ import Login from "./pages/Login";
 import { USER_INFO_ROUTE } from "./lib/constant";
 import Navbar from "./components/navbar";
 import NewNote from "./pages/NewNote";
+import Loading from "./components/Loading";
+import Error404 from "./components/Error404";
 
 const PrivateRoutes = ({ children }) => {
   const { user } = useContext(UserDataContext);
@@ -82,6 +84,10 @@ const router = createBrowserRouter([
       </PrivateRoutes>
     ),
   },
+  {
+    path: "*",
+    element: <Error404 />
+  }
 ]);
 
 function App() {
@@ -113,7 +119,7 @@ function App() {
   }, [user, setUser]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (

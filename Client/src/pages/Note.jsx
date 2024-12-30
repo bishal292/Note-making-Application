@@ -7,6 +7,9 @@ import {
   UPDATE_NOTE_ROUTE,
   UPLOAD_IMAGE_ROUTE,
 } from "../lib/constant";
+import { useNavigate } from "react-router-dom";
+import Loading from "../components/Loading";
+import Error404 from "../components/Error404";
 
 const Note = () => {
   const [note, setNote] = useState({
@@ -17,6 +20,7 @@ const Note = () => {
   });
   const [loading, setLoading] = useState(true);
   const [errorOccured, setErrorOccured] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Fetch the note data from the server using the note id from the url
@@ -81,9 +85,10 @@ const Note = () => {
 
   const deleteNote = async () => {
     try {
-      const response = await ApiClient.delete(`${DELETE_NOTE_ROUTE}`,{noteId:note._id});
-
-      console.log(response)
+      const response = await ApiClient.post(`${DELETE_NOTE_ROUTE}`,{noteId:note._id});
+      if(response.status === 200){
+        navigate("/")
+      }
     } catch (error) {
       
     }
@@ -102,10 +107,10 @@ const Note = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading/>
   }
   if (errorOccured) {
-    return <div>Error fetching note</div>;
+    return <Error404 />
   }
 
   return (

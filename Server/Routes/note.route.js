@@ -13,7 +13,7 @@ NoteRouter.post("/create-note", authMiddleware,createNote);
 
 NoteRouter.patch("/update-note", authMiddleware,updateNote);
 
-NoteRouter.delete("/delete-note", authMiddleware,deleteNote);
+NoteRouter.post("/delete-note", authMiddleware,deleteNote);
 
 NoteRouter.get("/get-notes", authMiddleware,getNotes);
 

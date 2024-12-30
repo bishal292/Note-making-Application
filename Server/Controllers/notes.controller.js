@@ -1,5 +1,6 @@
 import { NoteModel } from "../models/Note.model.js";
 import { renameSync } from "fs";
+import mongoose from "mongoose";
 
 export const createNote = async (req, res) => {
   const { title, content, image } = req.body;
@@ -103,7 +104,10 @@ export const searchNoteById = async (req, res) => {
         message: "id is required to search for note with similar title",
       });
   }
-
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid note ID" });
+  }
+  
   const note = await NoteModel.findById(id);
   if (!note) {
     return res.status(400).json({ message: "No such Notes found" });
