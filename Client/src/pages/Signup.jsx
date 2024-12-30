@@ -1,18 +1,44 @@
-import axios from "axios";
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserDataContext } from "../context/AuthContext";
+import { SIGNUP_ROUTE } from "../lib/constant";
+import { ApiClient } from "../lib/ApiClient";
 
 const Signup = () => {
+  const [userName, setUserName] = useState("")
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { user, setUser } = useContext(UserDataContext);
+  const { setUser } = useContext(UserDataContext);
 
   const navigate = useNavigate();
 
   const signupHandler = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await ApiClient.post(SIGNUP_ROUTE, {
+        userName,
+        email,
+        password,
+      });
+
+      console.log(response);
+      if(response.status === 201){
+        setUser(response.data.user);
+        
+        setEmail("");
+        setPassword("");
+        setUserName("");
+        navigate("/");
+      }
+    } catch (error) {
+      console.log(error);
+    }finally{
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -25,8 +51,8 @@ const Signup = () => {
             <input
               className="border border-gray-300 p-3 rounded-md w-full mb-4"
               type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
               required
               placeholder="Bishal Singh"
             />
@@ -48,8 +74,14 @@ const Signup = () => {
               required
               placeholder="password"
             />
-            <button type="submit" className="bg-blue-500 text-white p-3 rounded-md w-full hover:bg-blue-600 transition duration-300">
-              Signup
+            <button
+              type="submit"
+              className={`${
+                isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+              } text-white p-3 rounded-md w-full transition duration-300`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Siguup'}
             </button>
           </form>
           <p className="text-center mt-4">

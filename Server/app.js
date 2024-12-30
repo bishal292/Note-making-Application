@@ -29,6 +29,9 @@ app.use(cors({
     credentials: true
 }));
 
+
+app.use("/uploads/notes", express.static("uploads/notes"));
+
 app.use("/user",UserRouter);
 app.use("/notes",NoteRouter);
 

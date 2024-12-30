@@ -1,6 +1,11 @@
 import express from 'express';
-import { createNote, updateNote, deleteNote , getNotes , searchNote } from '../Controllers/notes.controller.js';
+import { createNote, updateNote, deleteNote , getNotes , searchNoteByTitle ,searchNoteById , uploadImage} from '../Controllers/notes.controller.js';
 import authMiddleware from '../middleware/auth.middleware.js';
+import multer from 'multer';
+
+
+const upload = multer({ dest: 'uploads/notes/' });
+
 
 const NoteRouter = express.Router();
 
@@ -12,7 +17,11 @@ NoteRouter.delete("/delete-note", authMiddleware,deleteNote);
 
 NoteRouter.get("/get-notes", authMiddleware,getNotes);
 
-NoteRouter.get("/get-note", authMiddleware,searchNote);
+NoteRouter.get("/get-note", authMiddleware,searchNoteByTitle);
+
+NoteRouter.get("/get-note-by-id",authMiddleware,searchNoteById);
+
+NoteRouter.post("/upload-image",authMiddleware , upload.single("note-image") ,uploadImage);
 
 
 

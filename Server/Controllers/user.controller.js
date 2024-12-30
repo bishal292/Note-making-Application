@@ -75,7 +75,7 @@ export const UserLogin = async (req, res) => {
       console.log(authToken);
       res.cookie("authToken", authToken);
 
-      res.status(201).json({
+      res.status(200).json({
         user: {
           email,
           _id: checkUser._id,
@@ -87,5 +87,30 @@ export const UserLogin = async (req, res) => {
     console.log(error);
     return res.status(500).send("Internal Server Error");
   }
-  
 };
+
+export const getUserInfo = async (req, res) => {
+  const user = await UserModel.findById(req.userId);
+  if (!user) {
+    res.status(400).json({ message: "User not authenticated" });
+  }
+  res.status(200).json({
+    user: {
+      userName: user.userName,
+      email: user.email,
+      id: user._id,
+    },
+  });
+};
+
+
+export const logout = async(req,res)=>{
+
+  try {
+    console.log("control to logout handler");
+    res.cookie("authToken",'',{ maxAge: 1 })
+    res.status(200).json({message:"User Logged out Successfully"});
+  } catch (error) {
+    console.error(`Some Error occured Logging out ${error}`)
+  }
+}

@@ -2,7 +2,6 @@ import {
   createBrowserRouter,
   Navigate,
   RouterProvider,
-  useNavigate,
 } from "react-router-dom";
 import Home from "./pages/Home";
 import { UserDataContext } from "./context/AuthContext";
@@ -11,19 +10,29 @@ import Note from "./pages/Note";
 import { ApiClient } from "./lib/ApiClient";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import { USER_INFO_ROUTE } from "./lib/constant";
+import Navbar from "./components/navbar";
+import NewNote from "./pages/NewNote";
 
 const PrivateRoutes = ({ children }) => {
   const { user } = useContext(UserDataContext);
-  const { email, userName } = user;
-  const isAunthenicated = !!email && !!userName; // if both is present in the context then user is authenticated.
-  return isAunthenicated ? children : <Navigate to="/auth/login" />;
+  // console.log(`Private Routes : ${user} and authentication ${!user}`);
+  return user && Object.keys(user).length > 0 ? children : <Navigate to="/auth/login" />;
 };
 
 const AuthRoutes = ({ children }) => {
   const { user } = useContext(UserDataContext);
-  const { email, userName } = user;
-  const isAunthenicated = !!email && !!userName; // if both is present in the context then user is authenticated.
-  return isAunthenicated ? <Navigate to="/" /> : children;
+  // console.log(`Auth Routes : ${user} and authentication ${!user}`);
+  return user && Object.keys(user).length > 0 ? <Navigate to="/" /> : children;
+};
+
+const LayoutWithNavBar = ({ children }) => {
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 };
 
 const router = createBrowserRouter([
@@ -31,7 +40,9 @@ const router = createBrowserRouter([
     path: "/",
     element: (
       <PrivateRoutes>
-        <Home />
+        <LayoutWithNavBar>
+          <Home />
+        </LayoutWithNavBar>
       </PrivateRoutes>
     ),
   },
@@ -55,66 +66,51 @@ const router = createBrowserRouter([
     path: "/notes/:noteId",
     element: (
       <PrivateRoutes>
-        <Note />
+        <LayoutWithNavBar>
+          <Note />
+        </LayoutWithNavBar>
+      </PrivateRoutes>
+    ),
+  },
+  {
+    path: "/new-note",
+    element: (
+      <PrivateRoutes>
+        <LayoutWithNavBar>
+          <NewNote />
+        </LayoutWithNavBar>
       </PrivateRoutes>
     ),
   },
 ]);
 
-// Without Route Validations
-
-// const router = createBrowserRouter([
-//   {
-//     path:"/",
-//     element: <Home/>
-//   },
-//   {
-//     path:"/auth/login",
-//     element: <Login/>
-//   },
-//   {
-//     path:"/auth/signup",
-//     element: <Signup/>
-//   },
-//   {
-//     path:"/notes/:noteId",
-//     element:<Note />
-//   }
-// ]);
-
 function App() {
   const [loading, setLoading] = useState(true);
-
   const { user, setUser } = useContext(UserDataContext);
-  const { email, userName } = user;
 
   // Getting userinfo from the server with the help of browser cookies if user is not present in the contextApi and setting it to the Zustand store for global accessibility.
   useEffect(() => {
     const getUserData = async () => {
       try {
-        const response = await ApiClient.get("/user/user-info", {
-          withCredentials: true,
-        });
+        const response = await ApiClient.get(USER_INFO_ROUTE);
         console.log(response);
         if (response.status === 200) {
           console.log(response);
+          setUser(response.data.user);
         }
       } catch (err) {
         console.log(err);
-        setUser({
-          email: "",
-          userName: "",
-        });
+        setUser("");
       } finally {
         setLoading(false);
       }
     };
-    if (email != "" && userName != "") {
+    if (!user || Object.keys(user).length === 0) {
       getUserData();
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, setUser]);
 
   if (loading) {
     return <div>Loading...</div>;
